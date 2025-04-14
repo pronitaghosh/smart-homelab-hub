@@ -1,0 +1,49 @@
+# Obsidian Self Hosted
+
+services:
+## ---
+## Obsidian Couchbase DB for local sync
+  obsidian-couchdb-livesync:
+    image: docker.io/oleduc/docker-obsidian-livesync-couchdb:master
+    container_name: obsidian-couchdb-livesync
+    restart: always
+    user: ${PUID}:${PGID}
+    environment:
+      SERVER_URL: ${SERVER_URL}
+      COUCHDB_USER: ${COUCHDB_USER}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD}
+      COUCHDB_DATABASE: ${COUCHDB_DATABASE}
+    env_file:
+      - ./obsidian.env
+      - .env
+    ports:
+      - "${COUCHDB_PORT:-5984}:5984"
+    volumes:
+      - ${COUCHDB_DATA}:/opt/couchdb/data
+      - ./couchdb_local.ini:/opt/couchdb/etc/local.ini
+
+## ---
+## Obsidian Web App from Linux Server
+  obsidian-web:
+    image: lscr.io/linuxserver/obsidian:latest
+    container_name: obsidian-web
+    # security_opt:
+    #   - seccomp:unconfined #optional
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      # - TZ=Etc/UTC
+    env_file:
+      # - ./obsidian.env
+      - .env
+    volumes:
+      - ${WEB_CONFIG}:/config
+    ports:
+      - 3000:3000
+      - 3001:3001
+    # devices:
+    #   - /dev/dri:/dev/dri #optional
+    shm_size: "1gb"
+    restart: unless-stopped
+    depends_on:
+      - obsidian-couchdb-livesync

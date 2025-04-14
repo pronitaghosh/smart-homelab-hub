@@ -1,0 +1,21 @@
+
+
+# version: '3.3'
+services:
+  stirling-pdf:
+    image: docker.stirlingpdf.com/stirlingtools/stirling-pdf:latest-fat
+    container_name: smart-stirlingpdf
+    ports:
+      - '8080:8080'
+    env_file:
+      # - ./stirlingpdf.env
+      - .env
+    volumes:
+      - ${HOME}/${SERVERDATA}/stirlingpdf/trainingdata:/usr/share/tessdata # Required for extra OCR languages
+      - ${HOME}/${SERVERDATA}/stirlingpdf/extraconfigs:/configs
+      - ${HOME}/${SERVERDATA}/stirlingpdf/customfiles:/customFiles/
+      - ${HOME}/${SERVERDATA}/stirlingpdf/logs:/logs/
+      - ${HOME}/${SERVERDATA}/stirlingpdf/pipeline:/pipeline/
+    environment:
+      - DOCKER_ENABLE_SECURITY=false
+      - LANGS=en_US

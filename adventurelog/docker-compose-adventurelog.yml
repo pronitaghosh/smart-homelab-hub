@@ -1,0 +1,62 @@
+
+## AdventureLog 
+
+services:
+  adventurelog-web:
+    #build: ./frontend/
+    image: ghcr.io/seanmorley15/adventurelog-frontend:latest
+    container_name: smart-adventurelog-frontend
+    restart: unless-stopped
+    environment:
+      - PUBLIC_SERVER_URL=http://adventurelog-server:8000 # Should be the service name of the backend with port 8000, even if you change the port in the backend service
+      - ORIGIN=http://localhost:8015
+      - BODY_SIZE_LIMIT=Infinity
+    ports:
+      - "8015:3000"
+    depends_on:
+      - adventurelog-server
+
+  adventurelog-db:
+    image: postgis/postgis:15-3.3
+    container_name: smart-adventurelog-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: database
+      POSTGRES_USER: ${USER}
+      POSTGRES_PASSWORD: ${PASSWD}
+    volumes:
+      - ${HOME}/${SERVERDATA}/adventurelog/db:/var/lib/postgresql/data/
+
+  adventurelog-server:
+    #build: ./backend/
+    image: ghcr.io/seanmorley15/adventurelog-backend:latest
+    container_name: smart-adventurelog-backend
+    restart: unless-stopped
+    environment:
+      - PGHOST=adventurelog-db
+      - PGDATABASE=database
+      - PGUSER=${USER}
+      - PGPASSWORD=${PASSWD}
+      - SECRET_KEY=${PASS_KEY}
+      - DJANGO_ADMIN_USERNAME=${USERADMIN}
+      - DJANGO_ADMIN_PASSWORD=${PASSWDADMIN}
+      - DJANGO_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - PUBLIC_URL=http://localhost:8016 # Match the outward port, used for the creation of image urls
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8016,http://localhost:8015 # Comma separated list of trusted origins for CSRF
+      - DEBUG=False
+      - FRONTEND_URL=http://localhost:8015 # Used for email generation. This should be the url of the frontend
+    ports:
+      - "8016:80"
+    depends_on:
+      - adventurelog-db
+    volumes:
+      - ${HOME}/${SERVERDATA}/adventurelog/media:/code/media/
+
+# volumes:
+#   postgres_data:
+#   adventurelog_media:
+
+# # Network Definition
+# networks:
+#   bridge-network:
+#     driver: bridge

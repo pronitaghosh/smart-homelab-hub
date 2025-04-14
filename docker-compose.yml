@@ -1,0 +1,15 @@
+# Smart Servers Docker master
+
+include:
+  # Media Sharing
+  - jellyfin/docker-compose-jellyfin.yml
+  # File Sharing
+  - filebrowser/docker-compose-filebrowser.yml
+  # Image Sharing
+  - immich/docker-compose-immich.yml
+  # Feeds and Network
+  - memos/docker-compose-memos.yml
+  # Notes
+  - obsidian/docker-compose-obsidian.yml
+  # Finance & Budgeting
+  - firefly/docker-compose-firefly.yml

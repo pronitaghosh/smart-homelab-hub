@@ -1,0 +1,25 @@
+
+## FileBrowser Server (Linux Server)
+
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    container_name: smart-filebrowser
+    # user: uid:gid
+    environment:
+      - PUID=1000  # Replace with 'id -u'
+      - PGID=1000  # Replace with 'id -g'
+    network_mode: 'host'
+    ports:
+      - "8090:8080"
+    restart: 'unless-stopped'
+    # Volumes mounted
+    volumes:
+      - ${HOME}/${SERVERDATA}/filebrowser/db/filebrowser.db:/database/filebrowser.db
+      # - ${HOME}/${SERVERDATA}/filebrowser/config:/config
+      - ${HOME}/${SERVERDATA}/filebrowser/config/settings.json:/config/settings.json
+      - ${HOME}/${SERVERDATA}/filebrowser/app:/storage
+      - ${MEDIA}/Backups:/storage/local
+      # HDD Mounted share
+      # - ${MEDIA}/Movie_Music:/storage/movies
+      # - ${MEDIA}/Backups1:/storage/workstuff
